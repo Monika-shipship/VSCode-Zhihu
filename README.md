@@ -19,7 +19,8 @@
 ## ⚡ Features
 
 - 登录
-  - [二维码/账密登录](#🔑-登录 )
+  - [浏览器登录 + Cookie 导入（推荐）](#🔑-登录)
+  - [二维码/账密登录（传统，可能失败）](#🔑-登录)
 - 创作
   - [内容创作](#🖍-内容创作)
   - [内容发布](#📩-内容发布)
@@ -42,31 +43,75 @@
 
 ## 🔑 登录
 
-
 <a name = "login"></a>
+
+为了保证登录的稳定性和安全性，插件现在提供两种登录方式。
+
+### 浏览器登录 + Cookie 导入（推荐）⭐
+
+这是新增的、更稳定的登录方式，避免了知乎风控系统的拦截：
+
+1. **打开浏览器登录页面**
+   - 点击侧边栏的 "Zhihu: Web Login (Browser)" 按钮
+   - 或使用 `Ctrl + Shift + P` 打开命令面板，搜索执行 `Zhihu: Web Login (Browser)` 命令
+   - 插件会自动在默认浏览器中打开 `https://www.zhihu.com/signin`
+
+2. **在浏览器中完成登录**
+   - 在浏览器页面中扫码或输入账号密码完成登录
+   - 完成人机验证（如有）
+
+3. **导出 Cookie**
+   - 按 F12 打开浏览器开发者工具
+   - 进入 Application 标签（Chrome）或 Storage 标签（Firefox）
+   - 在左侧找到 Cookies → https://www.zhihu.com
+   - 复制以下重要 Cookie 的值：
+     - `z_c0`（最重要的登录令牌）
+     - `d_c0`（设备标识）  
+     - `_xsrf`（防跨站攻击令牌）
+     - `q_c1`（可选）
+
+4. **导入 Cookie 到 VS Code**
+   - 点击 "Zhihu: Import Cookies" 按钮
+   - 或执行 `Zhihu: Import Cookies` 命令
+   - 按格式粘贴：`z_c0=值1; d_c0=值2; _xsrf=值3`
+   - Cookie 会安全地存储在 VS Code 的 globalState 中
+
+5. **验证登录**
+   - 刷新推荐流查看是否显示个人信息
+   - 登录成功后会显示欢迎信息
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-20-32-09.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
+
+### 传统登录方式（可能失败）
+
+> ⚠️ **注意**：传统的二维码登录方式可能会被知乎风控系统拦截，导致登录失败。如果遇到错误代码 40352 或二维码无法加载，请使用上述"浏览器登录 + Cookie 导入"方式。
 
 进入主页面，左侧最上方栏为个人中心，点击登录图标，或使用 `Ctrl + Shift + P` 打开命令面板，搜索并执行 `Zhihu: Login` 命令。
 
 选择登录方式：
 
-### 二维码
+#### 二维码
 
 选择二维码登陆后，会弹出二维码页面，打开知乎 APP，扫码后点击确认登录：
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-20-28-08.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
 
-### 账号密码
+#### 账号密码
 
 视情况，插件会加载并显示验证码，提示你输入验证码，输入后，再依次根据提示输入手机号和密码即可。
 
-登录成功后会有问候语，推荐栏会自动刷新出你的个性签名和头像：
+### 注销登录
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-20-30-17.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
+执行 `Zhihu: Logout` 命令会同时清除文件 Cookie 和导入的 Cookie。
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-20-32-09.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
+### 隐私与安全
+
+- 导入的 Cookie 仅存储在本机 VS Code 的 globalState 中
+- 不会写入文件或上传网络
+- 日志中不会输出完整 Cookie 值（已脱敏处理）
+- 建议定期更新 Cookie 以保持登录状态
 
 
 
@@ -312,12 +357,20 @@ $$
 
 <a name = "icons"></a>
 
-点击左侧活动栏的知乎按钮，进入知乎插件页面，在推荐的上方可以看到三个按钮，对应的命令分别为 `Zhihu: Login`（登录），`Zhihu: Refresh`（刷新）, `Zhihu: Search`（搜素）。
+点击左侧活动栏的知乎按钮，进入知乎插件页面，在推荐的上方可以看到几个按钮：
+
+- `Zhihu: Web Login (Browser)`（浏览器登录 - 推荐）
+- `Zhihu: Import Cookies`（导入 Cookie）
+- `Zhihu: Refresh`（刷新）
+- `Zhihu: Search`（搜索）
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-19-53-17.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
 
-最右侧的更多栏点开，可以看到 `Zhihu: Logout` (注销) 命令按钮:
+最右侧的更多栏点开，可以看到传统登录和注销命令：
+
+- `Zhihu: Login (Legacy - 可能失败)` （传统登录）
+- `Zhihu: Logout` （注销）
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-20-00-48.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
