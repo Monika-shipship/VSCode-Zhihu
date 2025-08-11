@@ -20,6 +20,8 @@
 		"onCommand:zhihu.jianshuPublish",
 		"onCommand:zhihu.search",
 		"onCommand:zhihu.login",
+		"onCommand:zhihu.webLogin",
+		"onCommand:zhihu.importCookies",
 		"onCommand:zhihu.logout",
 		"onCommand:zhihu.previousPage",
 		"onCommand:zhihu.nextPage",
@@ -163,11 +165,23 @@
 			},
 			{
 				"command": "zhihu.login",
-				"title": "Zhihu: Login",
+				"title": "Zhihu: Login (Legacy - 可能失败)",
 				"icon": {
 					"light": "res/media/light/login.svg",
 					"dark": "res/media/dark/login.svg"
 				}
+			},
+			{
+				"command": "zhihu.webLogin",
+				"title": "Zhihu: Web Login (Browser)",
+				"icon": {
+					"light": "res/media/light/login.svg",
+					"dark": "res/media/dark/login.svg"
+				}
+			},
+			{
+				"command": "zhihu.importCookies",
+				"title": "Zhihu: Import Cookies"
 			},
 			{
 				"command": "zhihu.logout",
@@ -251,9 +265,19 @@
 					"group": "navigation@0"
 				},
 				{
-					"command": "zhihu.login",
+					"command": "zhihu.webLogin",
 					"when": "view == zhihu-feed",
 					"group": "navigation"
+				},
+				{
+					"command": "zhihu.importCookies",
+					"when": "view == zhihu-feed",
+					"group": "navigation"
+				},
+				{
+					"command": "zhihu.login",
+					"when": "view == zhihu-feed",
+					"group": "secondary"
 				},
 				{
 					"command": "zhihu.logout",

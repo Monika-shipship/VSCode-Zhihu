@@ -27,6 +27,8 @@ import { Output } from "./global/logger";
 import * as CacheManager from "./global/cache"
 import { ZhihuCompletionProvider, AtPeople } from "./lang/completion-provider";
 import { mermaiSupport } from "./util/mermai-support";
+import { webLogin } from "./commands/webLogin";
+import { importCookies } from "./commands/importCookies";
 
 export async function activate(context: vscode.ExtensionContext) {
 	Output('Extension Activated')
@@ -74,6 +76,12 @@ export async function activate(context: vscode.ExtensionContext) {
 	})
 	vscode.commands.registerCommand("zhihu.login", () =>
 		authenticateService.login()
+	);
+	vscode.commands.registerCommand("zhihu.webLogin", () =>
+		webLogin()
+	);
+	vscode.commands.registerCommand("zhihu.importCookies", () =>
+		importCookies(context)
 	);
 	vscode.commands.registerCommand("zhihu.jianshuLogin", () => {
 		authenticateService.jianshuLogin()
