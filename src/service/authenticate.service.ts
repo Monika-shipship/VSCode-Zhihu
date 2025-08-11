@@ -14,8 +14,9 @@ import { AccountService } from "./account.service";
 import { HttpService, clearCookie, sendRequest } from "./http.service";
 import { ProfileService } from "./profile.service";
 import { WebviewService } from "./webview.service";
-import { getExtensionPath } from "../global/globa-var";
+import { getExtensionPath, getGlobalState } from "../global/globa-var";
 import { Output } from "../global/logger";
+import { clearCookies } from "../auth/cookies";
 
 var formurlencoded = require('form-urlencoded').default;
 
@@ -26,9 +27,17 @@ export class AuthenticateService {
 		protected feedTreeViewProvider: FeedTreeViewProvider,
 		protected webviewService: WebviewService) {
 	}
-	public logout() {
+	public async logout() {
 		try {
 			clearCookie();
+			
+			// Also clear cookies from globalState
+			const globalState = getGlobalState();
+			if (globalState) {
+				await clearCookies({ globalState } as any);
+				Output('已清除导入的 Cookie', 'info');
+			}
+			
 			this.feedTreeViewProvider.refresh();
 			// fs.writeFileSync(path.join(getExtensionPath(), 'cookie.txt'), '');
 		} catch (error) {
@@ -236,26 +245,41 @@ export class AuthenticateService {
 	}
 
 	public async qrcodeLogin() {
-		await sendRequest({
-			uri: UDIDAPI,
-			method: 'post'
-		});
-		let resp = await sendRequest({
-			uri: QRCodeAPI,
-			method: 'post',
-			json: true,
-			gzip: true,
-			header: QRCodeOptionHeader
-		});
-		let qrcode = await sendRequest({
-			uri: `${QRCodeAPI}/${resp.token}/image`,
-			encoding: null
-		});
-		fs.writeFileSync(path.join(getExtensionPath(), 'qrcode.png'), qrcode);
-		const panel = vscode.window.createWebviewPanel("zhihu", "验证码", { viewColumn: vscode.ViewColumn.One, preserveFocus: true });
-		const imgSrc = panel.webview.asWebviewUri(vscode.Uri.file(
-			path.join(getExtensionPath(), './qrcode.png')
-		))
+		try {
+			await sendRequest({
+				uri: UDIDAPI,
+				method: 'post'
+			});
+			let resp = await sendRequest({
+				uri: QRCodeAPI,
+				method: 'post',
+				json: true,
+				gzip: true,
+				header: QRCodeOptionHeader
+			});
+			
+			// Check for error response, especially 40352 (unhuman/anti-automation)
+			if (resp && (resp.error || resp.code === 40352)) {
+				this.showQRCodeMigrationMessage();
+				return;
+			}
+			
+			let qrcode = await sendRequest({
+				uri: `${QRCodeAPI}/${resp.token}/image`,
+				encoding: null
+			});
+			
+			// Check if QR code image is valid
+			if (!qrcode || qrcode.length === 0) {
+				this.showQRCodeMigrationMessage();
+				return;
+			}
+			
+			fs.writeFileSync(path.join(getExtensionPath(), 'qrcode.png'), qrcode);
+			const panel = vscode.window.createWebviewPanel("zhihu", "验证码", { viewColumn: vscode.ViewColumn.One, preserveFocus: true });
+			const imgSrc = panel.webview.asWebviewUri(vscode.Uri.file(
+				path.join(getExtensionPath(), './qrcode.png')
+			))
 		this.webviewService.renderHtml(
 			{
 				title: '二维码',
@@ -300,7 +324,11 @@ export class AuthenticateService {
 			console.log('Window is disposed')
 			clearInterval(intervalId)
 		})
+	} catch (error) {
+		Output(`二维码登录失败: ${error}`, 'error');
+		this.showQRCodeMigrationMessage();
 	}
+}
 
 	public async weixinLogin() {
 		await sendRequest({
@@ -521,5 +549,40 @@ export class AuthenticateService {
 					return Promise.resolve(false);
 				// this.weixinPolling(p, uuid, panel, state)
 		}		
+	}
+
+	/**
+	 * Show migration message when QR code login fails
+	 */
+	private async showQRCodeMigrationMessage(): Promise<void> {
+		const action = await vscode.window.showWarningMessage(
+			'二维码登录可能被知乎风控拦截。建议使用新的"浏览器登录 + 导入 Cookie"方式。',
+			'使用浏览器登录', '导入 Cookie', '了解详情'
+		);
+
+		switch (action) {
+			case '使用浏览器登录':
+				await vscode.commands.executeCommand('zhihu.webLogin');
+				break;
+			case '导入 Cookie':
+				await vscode.commands.executeCommand('zhihu.importCookies');
+				break;
+			case '了解详情':
+				const helpMessage = `
+为什么要迁移到新登录方式？
+
+旧的二维码直连接口登录经常被知乎风控（错误代码 40352）拦截，
+导致二维码图片无法加载，登录失败。
+
+新的登录方式更稳定：
+1. 使用浏览器在官方网页完成登录和验证
+2. 导入浏览器中的 Cookie 到 VS Code
+3. 避免直接调用容易被拦截的 API
+
+这种方式更接近正常用户行为，不易被风控系统识别。
+				`;
+				await vscode.window.showInformationMessage(helpMessage, { modal: true });
+				break;
+		}
 	}
 }

@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - Web-Based Login Migration
+
+### 🆕 Added
+- **新增浏览器登录方式**: 新增 `Zhihu: Web Login (Browser)` 命令，使用默认浏览器打开知乎官方登录页面
+- **新增 Cookie 导入功能**: 新增 `Zhihu: Import Cookies` 命令，支持手动导入浏览器中的 Cookie
+- **安全存储**: Cookie 存储在 VS Code globalState 中，更安全，不会写入文件
+- **智能错误处理**: 自动检测 401/403/40352 等认证失败，提示使用新登录方式
+- **迁移提示**: 当旧二维码登录遇到风控拦截时，提供友好的迁移指导
+
+### 🔄 Changed
+- **登录方式优先级**: 传统二维码登录标记为 "Legacy（可能失败）"，推荐使用新的浏览器登录方式
+- **HTTP 请求优化**: HTTP 服务优先使用 globalState 中的 Cookie，提高请求成功率
+- **UI 调整**: 调整侧边栏按钮顺序，新登录方式放在更显眼位置
+
+### 🐛 Fixed
+- **解决风控问题**: 避免直接调用容易被知乎风控系统拦截的二维码 API
+- **提高登录稳定性**: 新登录方式更接近正常用户行为，不易被识别为自动化行为
+
+### 🔒 Security
+- **Cookie 脱敏**: 日志中不会输出完整 Cookie 值，已做脱敏处理
+- **本地存储**: Cookie 仅存储在本机，不上传网络
+- **清理机制**: 注销时同时清除传统 Cookie 和导入的 Cookie
+
+### 📚 Documentation
+- **更新使用说明**: README 新增详细的浏览器登录步骤和 Cookie 导入指南
+- **安全提示**: 添加了隐私和安全相关的使用建议
+
+### ⚠️ Breaking Changes
+- 旧的二维码登录方式可能会频繁失败，建议迁移到新的浏览器登录方式
+
 ## [0.3.0]
 
 ### 文章/答案发布后自动生成头部链接
