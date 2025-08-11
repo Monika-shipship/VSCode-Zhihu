@@ -16,12 +16,15 @@ export async function webLogin(): Promise<void> {
         const action = await vscode.window.showInformationMessage(
             '已在浏览器中打开知乎登录页面。\n' +
             '请在浏览器中完成扫码登录，然后执行 "Zhihu: Import Cookies" 命令导入 Cookie。',
-            '打开导入 Cookie 命令'
+            '打开导入 Cookie 命令', '如何获取 Cookie'
         );
         
         if (action === '打开导入 Cookie 命令') {
             // Execute the import cookies command
             await vscode.commands.executeCommand('zhihu.importCookies');
+        } else if (action === '如何获取 Cookie') {
+            // Show cookie instructions
+            await vscode.commands.executeCommand('zhihu.showCookieInstructions');
         }
         
         Output('已打开浏览器登录页面，请完成登录后导入 Cookie', 'info');

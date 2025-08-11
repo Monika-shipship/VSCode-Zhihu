@@ -22,6 +22,7 @@
 		"onCommand:zhihu.login",
 		"onCommand:zhihu.webLogin",
 		"onCommand:zhihu.importCookies",
+		"onCommand:zhihu.showCookieInstructions",
 		"onCommand:zhihu.logout",
 		"onCommand:zhihu.previousPage",
 		"onCommand:zhihu.nextPage",
@@ -182,6 +183,10 @@
 			{
 				"command": "zhihu.importCookies",
 				"title": "Zhihu: Import Cookies"
+			},
+			{
+				"command": "zhihu.showCookieInstructions",
+				"title": "Zhihu: How to Get Cookies"
 			},
 			{
 				"command": "zhihu.logout",
